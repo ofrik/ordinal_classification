@@ -2,6 +2,7 @@ __author__ = 'Ofri'
 
 from sklearn.svm import SVC
 from sklearn.svm import LinearSVC
+import numpy as np
 import pandas as pd
 import random
 from sklearn.base import clone
@@ -88,8 +89,25 @@ class OrdinalClassifier(object):
             datasets.append(newds)
         return datasets
 
+def regressionToOrdinal(y):
+    maxValue = max(y)
+    minValue = min(y)
+    part = (maxValue-minValue)/3
+    lowThreshold = minValue+part
+    highThreshold = maxValue-part
+    def makeOrdinal(x):
+        if x<=lowThreshold:
+            return "LOW"
+        elif x>highThreshold:
+            return "HIGH"
+        else:
+            return "MEDIUM"
+    arrayChanger = np.vectorize(makeOrdinal)
+    return arrayChanger(y)
+
 
 if __name__ == "__main__":
+    print regressionToOrdinal([random.randrange(0,100) for i in range(1000)])
     y = pd.DataFrame([random.randrange(0, 3) for i in range(1000)])
     X = pd.DataFrame([[random.randrange(0, 10) for i in range(4)] for j in range(1000)])
     estimator = SVC(probability=True)
