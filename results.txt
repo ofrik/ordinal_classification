@@ -1,0 +1,28 @@
+comparing Wine Quality
+
+original mean score: 0.627830772759
+ordinal mean score: 0.622319943299
+
+
+comparing Combined Cycle Power Plant
+
+original mean score: 0.883361327462
+ordinal mean score: 0.882420888591
+
+
+comparing BlogFeedback
+
+original mean score: 0.998625943271
+ordinal mean score: 0.998625943271
+
+
+comparing Facebook Comment Volume
+
+original mean score: 0.998656880765
+ordinal mean score: 0.998656880765
+
+
+comparing Online News Popularity
+
+original mean score: 0.999747758201
+ordinal mean score: 0.999747758201
