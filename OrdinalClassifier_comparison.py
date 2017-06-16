@@ -1,6 +1,8 @@
 __author__ = 'Ofri'
 
-from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.neighbors import KNeighborsClassifier
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
@@ -60,28 +62,33 @@ if __name__ == "__main__":
                 ("Facebook Comment Volume", facebook_comments_df_X, regressionToOrdinal(facebook_comments_df_Y.values)),
                 ("Online News Popularity", popularity_df_X, regressionToOrdinal(popularity_df_Y.values))]
 
-    for dataset in datasets:
-        print "comparing %s" % (dataset[0])
-        X = dataset[1]
-        print "has %s train records"%X.shape[0]
-        y = dataset[2]
-        kf = KFold(n_splits=5)
-        originalScores = []
-        originalFitTime = []
-        ordinalScores = []
-        ordinalFitTime = []
-        for train_index, test_index in kf.split(X):
-            X_train, X_test = X.iloc[train_index], X.iloc[test_index]
-            y_train, y_test = y.iloc[train_index], y.iloc[test_index]
-            estimator = SVC(probability=True)
-            ordinal = OrdinalClassifier(estimator, [1, 2, 3])
-            t0 = datetime.now()
-            estimator.fit(X_train, y_train)
-            originalFitTime.append((datetime.now() - t0).total_seconds())
-            t0 = datetime.now()
-            ordinal.fit(X_train, y_train)
-            ordinalFitTime.append((datetime.now() - t0).total_seconds())
-            originalScores.append(estimator.score(X_test, y_test))
-            ordinalScores.append(ordinal.score(X_test, y_test))
-        print "\noriginal mean score: %s with mean time of %s seconds\nordinal mean score: %s with mean time of %s seconds\n\n" % (
-        np.mean(originalScores),np.mean(originalFitTime),np.mean(ordinalScores),np.mean(ordinalFitTime))
+    kf = KFold(n_splits=5)
+    clfs = [("KNeighborsClassifier",KNeighborsClassifier),("RandomForestClassifier",RandomForestClassifier),("MLPClassifier",MLPClassifier)]
+    def checkClassifier(clf):
+        for dataset in datasets:
+            print "comparing %s using %s" % (dataset[0],clf[0])
+            X = dataset[1]
+            print "has %s train records"%X.shape[0]
+            y = dataset[2]
+            originalScores = []
+            originalFitTime = []
+            ordinalScores = []
+            ordinalFitTime = []
+            for train_index, test_index in kf.split(X):
+                X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+                y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+                estimator = clf[1](n_jobs=-1)
+                ordinal = OrdinalClassifier(estimator, [1, 2, 3])
+                t0 = datetime.now()
+                estimator.fit(X_train, y_train)
+                originalFitTime.append((datetime.now() - t0).total_seconds())
+                t0 = datetime.now()
+                ordinal.fit(X_train, y_train)
+                ordinalFitTime.append((datetime.now() - t0).total_seconds())
+                originalScores.append(estimator.score(X_test, y_test))
+                ordinalScores.append(ordinal.score(X_test, y_test))
+            print "\noriginal mean score: %s with mean time of %s seconds\nordinal mean score: %s with mean time of %s seconds\n\n" % (
+            np.mean(originalScores),np.mean(originalFitTime),np.mean(ordinalScores),np.mean(ordinalFitTime))
+
+    for clf in clfs:
+        checkClassifier(clf)
