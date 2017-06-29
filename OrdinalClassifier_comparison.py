@@ -3,6 +3,7 @@ __author__ = 'Ofri'
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, f1_score, recall_score, precision_score
 from sklearn.svm import SVC
 from sklearn.base import clone
 import numpy as np
@@ -46,15 +47,18 @@ if __name__ == "__main__":
     facebook_comments_df = pd.read_csv(
         "datasets\\facebook_comments.csv",
         names=["f" + str(i) for i in range(54)])
+    facebook_comments_df = facebook_comments_df[:20000]
     facebook_comments_df_X = facebook_comments_df[facebook_comments_df.columns[:-1]]
     facebook_comments_df_Y = facebook_comments_df[facebook_comments_df.columns[-1:]]
 
     popularity_df = pd.read_csv("datasets\\OnlineNewsPopularity.csv")
+    popularity_df = popularity_df[:10000]
     popularity_df_X = popularity_df[popularity_df.columns[2:-1]]
     popularity_df_Y = popularity_df[popularity_df.columns[-1:]]
 
     blogdata_df = pd.read_csv("datasets\\blogData_train.csv",
                               names=["f" + str(i) for i in range(281)])
+    blogdata_df = blogdata_df[:5000]
     blogdata_df_X = blogdata_df[blogdata_df.columns[:-1]]
     blogdata_df_Y = blogdata_df[blogdata_df.columns[-1:]]
 
@@ -76,12 +80,19 @@ if __name__ == "__main__":
             X = dataset[1]
             print "has %s train records" % X.shape[0]
             y = dataset[2]
-            originalScores = []
             originalFitTime = []
-            originalScoreTime = []
-            ordinalScores = []
+            originalPredictTime = []
+            originalAcc = []
+            originalRecall = []
+            originalPrecision = []
+            originalF1 = []
             ordinalFitTime = []
-            ordinalScoreTime = []
+            ordinalPredictTime = []
+            ordinalAcc = []
+            ordinalRecall = []
+            ordinalPrecision = []
+            ordinalF1 = []
+
             for train_index, test_index in kf.split(X):
                 X_train, X_test = X.iloc[train_index], X.iloc[test_index]
                 y_train, y_test = y.iloc[train_index], y.iloc[test_index]
@@ -94,14 +105,25 @@ if __name__ == "__main__":
                 ordinal.fit(X_train, y_train)
                 ordinalFitTime.append((datetime.now() - t0).total_seconds())
                 t0 = datetime.now()
-                originalScores.append(estimator.score(X_test, y_test))
-                originalScoreTime.append((datetime.now() - t0).total_seconds())
+                estimator_preds = estimator.predict(X_test)
+                originalPredictTime.append((datetime.now() - t0).total_seconds())
+                originalAcc.append(accuracy_score(y_test, estimator_preds))
+                originalRecall.append(recall_score(y_test, estimator_preds))
+                originalPrecision.append(precision_score(y_test, estimator_preds))
+                originalF1.append(f1_score(y_test, estimator_preds))
                 t0 = datetime.now()
-                ordinalScores.append(ordinal.score(X_test, y_test))
-                ordinalScoreTime.append((datetime.now() - t0).total_seconds())
-            print "original mean score: %s with mean time of %s seconds and mean score time of %s seconds\nordinal mean score: %s with mean time of %s seconds and mean score time of %s seconds" % (
-                np.mean(originalScores), np.mean(originalFitTime), np.mean(originalScoreTime), np.mean(ordinalScores),
-                np.mean(ordinalFitTime), np.mean(ordinalScoreTime))
+                ordinal_preds = ordinal.predict(X_test)
+                ordinalPredictTime.append((datetime.now() - t0).total_seconds())
+                ordinalAcc.append(accuracy_score(y_test, ordinal_preds))
+                ordinalRecall.append(recall_score(y_test, ordinal_preds))
+                ordinalPrecision.append(precision_score(y_test, ordinal_preds))
+                ordinalF1.append(f1_score(y_test, ordinal_preds))
+            print "Original:\nFit time: %s\nPredictTime: %s\nAccuracy: %s\nRecall: %s\nPrecision: %s\nF1: %s\n\n" % (
+                np.mean(originalFitTime), np.mean(originalPredictTime), np.mean(originalAcc), np.mean(originalRecall),
+                np.mean(originalPrecision), np.mean(originalF1))
+            print "Ordinal:\nFit time: %s\nPredictTime: %s\nAccuracy: %s\nRecall: %s\nPrecision: %s\nF1: %s\n\n" % (
+                np.mean(ordinalFitTime), np.mean(ordinalPredictTime), np.mean(ordinalAcc), np.mean(ordinalRecall),
+                np.mean(ordinalPrecision), np.mean(ordinalF1))
             print "the entire thing took %s seconds\n\n" % ((datetime.now() - t).total_seconds())
 
 
