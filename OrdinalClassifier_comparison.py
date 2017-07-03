@@ -108,22 +108,24 @@ if __name__ == "__main__":
                 estimator_preds = estimator.predict(X_test)
                 originalPredictTime.append((datetime.now() - t0).total_seconds())
                 originalAcc.append(accuracy_score(y_test, estimator_preds))
-                originalRecall.append(recall_score(y_test, estimator_preds))
-                originalPrecision.append(precision_score(y_test, estimator_preds))
-                originalF1.append(f1_score(y_test, estimator_preds))
+                originalRecall.append(recall_score(y_test, estimator_preds, average=None))
+                originalPrecision.append(precision_score(y_test, estimator_preds, average=None))
+                originalF1.append(f1_score(y_test, estimator_preds, average=None))
                 t0 = datetime.now()
                 ordinal_preds = ordinal.predict(X_test)
                 ordinalPredictTime.append((datetime.now() - t0).total_seconds())
                 ordinalAcc.append(accuracy_score(y_test, ordinal_preds))
-                ordinalRecall.append(recall_score(y_test, ordinal_preds))
-                ordinalPrecision.append(precision_score(y_test, ordinal_preds))
-                ordinalF1.append(f1_score(y_test, ordinal_preds))
+                ordinalRecall.append(recall_score(y_test, ordinal_preds, average=None))
+                ordinalPrecision.append(precision_score(y_test, ordinal_preds, average=None))
+                ordinalF1.append(f1_score(y_test, ordinal_preds, average=None))
             print "Original:\nFit time: %s\nPredictTime: %s\nAccuracy: %s\nRecall: %s\nPrecision: %s\nF1: %s\n\n" % (
-                np.mean(originalFitTime), np.mean(originalPredictTime), np.mean(originalAcc), np.mean(originalRecall),
-                np.mean(originalPrecision), np.mean(originalF1))
+                np.mean(originalFitTime), np.mean(originalPredictTime), np.mean(originalAcc),
+                np.mean([x[0] for x in originalRecall]),
+                np.mean([x[0] for x in originalPrecision]), np.mean([x[0] for x in originalF1]))
             print "Ordinal:\nFit time: %s\nPredictTime: %s\nAccuracy: %s\nRecall: %s\nPrecision: %s\nF1: %s\n\n" % (
-                np.mean(ordinalFitTime), np.mean(ordinalPredictTime), np.mean(ordinalAcc), np.mean(ordinalRecall),
-                np.mean(ordinalPrecision), np.mean(ordinalF1))
+                np.mean(ordinalFitTime), np.mean(ordinalPredictTime), np.mean(ordinalAcc),
+                np.mean([x[0] for x in ordinalRecall]),
+                np.mean([x[0] for x in ordinalPrecision]), np.mean([x[0] for x in ordinalF1]))
             print "the entire thing took %s seconds\n\n" % ((datetime.now() - t).total_seconds())
 
 
